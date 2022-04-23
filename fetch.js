@@ -1,5 +1,6 @@
 const PiwikClient = require("piwik-client");
 const pAll = require("p-all");
+const addDays = require("date-fns/addDays");
 
 const MATOMO_URL = process.env.MATOMO_URL;
 const MATOMO_TOKEN = process.env.MATOMO_TOKEN;
@@ -24,6 +25,20 @@ const fetchSiteStats = async ({ client, site }) => {
         ...params,
       },
     });
+
+  const getDailyVisits = ({ days = 15 } = {}) =>
+    pAll(
+      Array.from({ length: days }).map((_, i) => async () => {
+        const newDate = addDays(new Date(), -i).toISOString().substring(0, 10);
+        const summary = await getVisitsSummary({
+          period: "day",
+          date: newDate,
+        });
+        return { date: newDate, summary };
+      }),
+      { concurrency: 1 }
+    );
+
   const callApiMethod = (method) => (params) =>
     callApi({
       method,
@@ -35,6 +50,21 @@ const fetchSiteStats = async ({ client, site }) => {
   const getPageUrls = callApiMethod("Actions.getPageUrls");
   const getDeviceType = callApiMethod("DevicesDetection.getType");
   const getBrowsers = callApiMethod("DevicesDetection.getBrowsers");
+
+  const live = await callApi({
+    method: "Live.getCounters",
+    idSite: site.idsite,
+    lastMinutes: "60",
+  });
+
+  const visits = await getDailyVisits();
+
+  const countries = await callApi({
+    method: "UserCountry.getCountry",
+    idSite: site.idsite,
+    period: "week",
+    date: new Date().toISOString(),
+  });
 
   const summaryDay = await getVisitsSummary({
     period: "day",
@@ -60,12 +90,6 @@ const fetchSiteStats = async ({ client, site }) => {
   const referrersMonth = await getReferrers({
     period: "month",
     date: new Date().toISOString(),
-  });
-
-  const live = await callApi({
-    method: "Live.getCounters",
-    idSite: site.idsite,
-    lastMinutes: "30",
   });
 
   const pagesDay = await getPageUrls({
@@ -109,6 +133,8 @@ const fetchSiteStats = async ({ client, site }) => {
 
   const stats = {
     live,
+    visits,
+    countries,
     summary: {
       day: summaryDay,
       week: summaryWeek,
@@ -154,7 +180,11 @@ const fetchAllStats = async () => {
     }),
     { concurrency: 1 }
   );
-  return results;
+  return {
+    date: new Date().toISOString(),
+    url: process.env.MATOMO_URL,
+    data: results,
+  };
 };
 
 module.exports = { fetchAllStats };

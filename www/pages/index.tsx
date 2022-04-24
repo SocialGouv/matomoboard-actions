@@ -1,13 +1,16 @@
+import { Datum, ResponsiveLine } from "@nivo/line";
+import { ResponsivePie } from "@nivo/pie";
+import format from "date-fns/format";
+import frLocale from "date-fns/locale/fr";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import { ResponsiveLine } from "@nivo/line";
-import { ResponsivePie } from "@nivo/pie";
+import { CSSProperties, ReactChildren } from "react";
+import { Col, Container, Row, Table } from "react-bootstrap";
 import GitHubForkRibbon from "react-github-fork-ribbon";
 
-const data = require("../src/data.json");
+const data = require("../src/data.json") as MatomoData;
 
-const TopWeekSites = () => {
+const TopWeekSites = ({ data }: { data: MatomoSitesDate }) => {
   const topWeekSites = data.sort((a: any, b: any) => {
     return b.stats.summary.week.nb_visits - a.stats.summary.week.nb_visits;
   });
@@ -48,7 +51,7 @@ const TopWeekSites = () => {
   );
 };
 
-const TopWeekContents = () => {
+const TopWeekContents = ({ data }: { data: MatomoSitesDate }) => {
   const topWeekContents = data
     .flatMap((site: any) =>
       site.stats.pages.week.map((entry: any) => ({
@@ -98,11 +101,7 @@ const TopWeekContents = () => {
   );
 };
 
-const MyResponsiveLine = (
-  {
-    /* see data tab */
-  }
-) => {
+const MyResponsiveLine = ({ data }: { data: Datum[] }) => {
   const lineData = data
     .sort((a: any, b: any) => {
       return b.stats.summary.week.nb_visits - a.stats.summary.week.nb_visits;
@@ -123,6 +122,7 @@ const MyResponsiveLine = (
     }));
 
   return (
+    //@ts-ignore
     <ResponsiveLine
       data={lineData}
       curve="monotoneX"
@@ -135,7 +135,6 @@ const MyResponsiveLine = (
         stacked: true,
         reverse: false,
       }}
-      xFormat={(value) => new Date(value).toLocaleString()}
       // yFormat=" >-.2f"
       axisTop={null}
       axisRight={null}
@@ -180,7 +179,7 @@ const MyResponsiveLine = (
   );
 };
 
-const MyResponsivePie = ({ data /* see data tab */ }) => (
+const MyResponsivePie = ({ data }: { data: Datum[] }) => (
   <ResponsivePie
     data={data}
     margin={{ top: 50, right: 80, bottom: 30, left: 80 }}
@@ -195,7 +194,7 @@ const MyResponsivePie = ({ data /* see data tab */ }) => (
   />
 );
 
-const TopMonthDevices = () => {
+const TopMonthDevices = ({ data }: { data: MatomoSitesDate }) => {
   const topMonthDevices = data
     .flatMap((site: any) =>
       site.stats.devices.month
@@ -234,7 +233,7 @@ const TopMonthDevices = () => {
   );
 };
 
-const TopMonthBrowsers = () => {
+const TopMonthBrowsers = ({ data }: { data: MatomoSitesDate }) => {
   const topMonthBrowsers = data
     .flatMap((site: any) =>
       site.stats.browsers.month
@@ -276,11 +275,17 @@ const TopMonthBrowsers = () => {
 
 const sum = (arr: number[]) => arr.reduce((a, c) => a + c, 0);
 
-const Box = ({ style = {}, children }) => (
+const Box = ({
+  style = {},
+  children,
+}: {
+  style?: CSSProperties;
+  children: JSX.Element | JSX.Element[];
+}) => (
   <div
     style={{
       border: "1px solid #eee",
-      boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px;",
+      boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
       padding: 10,
       margin: 10,
       ...style,
@@ -320,9 +325,9 @@ const getDayUsers = (data: any[]) =>
   sum(data.map((site) => parseInt(site.stats.summary.day.nb_visits)));
 
 const Home: NextPage = () => {
-  const countOnline = getOnlineUsers(data);
-  const countMonth = getMonthUsers(data);
-  const countToday = getDayUsers(data);
+  const countOnline = getOnlineUsers(data.data);
+  const countMonth = getMonthUsers(data.data);
+  const countToday = getDayUsers(data.data);
 
   return (
     <Container fluid>
@@ -339,7 +344,7 @@ const Home: NextPage = () => {
       </GitHubForkRibbon>
       <Row>
         <Col style={{ textAlign: "center", margin: 20 }}>
-          <h1>matomo.fabrique.social.gouv.fr</h1>
+          <h1>{data.url.replace(/^https?:\/\//, "")}</h1>
         </Col>
       </Row>
       <Container>
@@ -351,31 +356,31 @@ const Home: NextPage = () => {
         <Row>
           <Col xs={12}>
             <Box style={{ height: 400 }}>
-              <MyResponsiveLine />
+              <MyResponsiveLine data={data.data} />
             </Box>
           </Col>
         </Row>
         <Row>
           <Col sm={12} md={6}>
             <Box>
-              <TopWeekSites />
+              <TopWeekSites data={data.data} />
             </Box>
           </Col>
           <Col sm={12} md={6}>
             <Box>
-              <TopWeekContents />
+              <TopWeekContents data={data.data} />
             </Box>
           </Col>
         </Row>
         <Row>
           <Col sm={12} md={6}>
             <Box>
-              <TopMonthBrowsers />
+              <TopMonthBrowsers data={data.data} />
             </Box>
           </Col>
           <Col sm={12} md={6}>
             <Box>
-              <TopMonthDevices />
+              <TopMonthDevices data={data.data} />
             </Box>
           </Col>
         </Row>
@@ -383,7 +388,8 @@ const Home: NextPage = () => {
       <Row>
         <Col>
           <div style={{ textAlign: "center" }}>
-            Dernière mise à jour : le xxx
+            Dernière mise à jour : le{" "}
+            {format(new Date(data.date), "PPPP à pp", { locale: frLocale })}
           </div>
         </Col>
       </Row>

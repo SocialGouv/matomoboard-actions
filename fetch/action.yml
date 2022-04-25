@@ -24,7 +24,7 @@ runs:
       run: |
         cd ${{ github.action_path }}
         yarn
-        yarn start > ${{ github.workspace }}/${{ inputs.output }}
+        yarn -s start > ${{ github.workspace }}/${{ inputs.output }}
       env:
         MATOMO_URL: ${{ inputs.matomo-url }}
         MATOMO_TOKEN: ${{ inputs.matomo-token }}

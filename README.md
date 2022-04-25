@@ -22,6 +22,6 @@ Compile your matomo metrics in a single static web interface
 
 ## Dev
 
-The `report` folder contains the GH-action and fetch scripts that produces `data.json`.
+The `fetch` folder contains the GH-action and fetch scripts that produces `data.json`.
 
 The `report` folder contains the website that renders UI from `data.json`

@@ -1,0 +1,27 @@
+name: "MatomoBoard fetch Action"
+description: "Fetch stats from Matomo"
+
+inputs:
+  matomo-url:
+    description: "URL of matomo instance. ex: https://matomo.pouet.com"
+    required: true
+  matomo-token:
+    description: "Matomo API Token"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v2
+      with:
+        node-version: "14"
+    - name: Build
+      id: build
+      shell: bash
+      run: |
+        cd ${{ github.action_path }}
+        yarn
+        yarn start > ${{ github.workspace }}/data.json
+      env:
+        MATOMO_URL: ${{ inputs.matomo-url }}
+        MATOMO_TOKEN: ${{ inputs.matomo-token }}

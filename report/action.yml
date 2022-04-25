@@ -1,0 +1,34 @@
+name: "MatomoBoard report Action"
+description: "Generate a MatomoBoard report"
+
+inputs:
+  base-path:
+    description: "base-path for the next.js build. see https://nextjs.org/docs/api-reference/next.config.js/basepath"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v2
+      with:
+        node-version: "14"
+    - name: Build
+      id: build
+      shell: bash
+      env:
+        SKIP_PREFLIGHT_CHECK: "true"
+      run: |
+        export NEXT_PUBLIC_BASE_PATH=$([[ -n "${{ inputs.base-path }}" ]] && echo "${{ inputs.base-path }}" || echo "")
+        echo "NEXT_PUBLIC_BASE_PATH: $NEXT_PUBLIC_BASE_PATH"
+
+        cd ${{ github.action_path }}
+        cd ${{ github.workspace }}/data.json ./src/data.json
+        yarn
+        yarn build
+        yarn export
+
+        # prevent gh-pages jekyll build
+        touch out/.nojekyll
+
+        # save the build for gh-pages publication
+        mv out ${{ github.workspace }}/build

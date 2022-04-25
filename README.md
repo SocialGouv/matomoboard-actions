@@ -9,9 +9,9 @@ Compile your matomo metrics in a single static web interface
 
 ## Setup
 
-- Click "Use this template" to create your own GitHub repo
+- Click "Use this template" from the [template repo](https://github.com/socialgouv/matomoboard) to create your own GitHub repo
 
-- In yout Github Repo settings:
+- In your Github Repo settings:
 
   - Enable "Pages" on the `gh-branch`
   - Add `MATOMO_URL` and `MATOMO_TOKEN` in the `secrets` section
@@ -22,6 +22,6 @@ Compile your matomo metrics in a single static web interface
 
 ## Dev
 
-The repository root contains the GH-action and fetch scripts that produces `data.json`
+The `report` folder contains the GH-action and fetch scripts that produces `data.json`.
 
-The `www` repository contains the website that renders UI from `data.json`
+The `report` folder contains the website that renders UI from `data.json`

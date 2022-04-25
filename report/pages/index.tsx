@@ -11,9 +11,16 @@ import GitHubForkRibbon from "react-github-fork-ribbon";
 const data = require("../src/data.json") as MatomoData;
 
 const TopWeekSites = ({ data }: { data: MatomoSitesDate }) => {
-  const topWeekSites = data.sort((a: any, b: any) => {
-    return b.stats.summary.week.nb_visits - a.stats.summary.week.nb_visits;
-  });
+  const topWeekSites = data
+    .map((site) => ({
+      id: site.site.idsite,
+      url: site.site.main_url,
+      name: site.site.name,
+      nb_visits: sum(site.stats.visits.map((visit) => visit.summary.nb_visits)),
+    }))
+    .sort((a: any, b: any) => {
+      return b.nb_visits - a.nb_visits;
+    });
   return (
     <Table striped hover>
       <thead>
@@ -31,19 +38,13 @@ const TopWeekSites = ({ data }: { data: MatomoSitesDate }) => {
       </thead>
       <tbody>
         {topWeekSites.slice(0, 15).map((site: any) => (
-          <tr key={site.site.idsite}>
+          <tr key={site.id}>
             <td>
-              <a
-                href={site.site.main_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {site.site.name}
+              <a href={site.url} target="_blank" rel="noopener noreferrer">
+                {site.name}
               </a>
             </td>
-            <td>
-              {parseInt(site.stats.summary.week.nb_visits).toLocaleString()}
-            </td>
+            <td>{parseInt(site.nb_visits).toLocaleString()}</td>
           </tr>
         ))}
       </tbody>

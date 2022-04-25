@@ -21,8 +21,12 @@ runs:
         export NEXT_PUBLIC_BASE_PATH=$([[ -n "${{ inputs.base-path }}" ]] && echo "${{ inputs.base-path }}" || echo "")
         echo "NEXT_PUBLIC_BASE_PATH: $NEXT_PUBLIC_BASE_PATH"
 
+        ls ${{ github.action_path }}
+        ls ${{ github.workspace }}
+        
         cd ${{ github.action_path }}
-        cd ${{ github.workspace }}/data.json ./src/data.json
+        cp ${{ github.workspace }}/data.json ./src/data.json
+        
         yarn
         yarn build
         yarn export

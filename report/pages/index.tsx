@@ -333,7 +333,10 @@ const Home: NextPage = () => {
     <Container fluid>
       <Head>
         <title>MatomoBoard</title>
-        <link rel="shortcut icon" href="/favicon.png" />
+        <link
+          rel="shortcut icon"
+          href={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/favicon.png`}
+        />
       </Head>
       <GitHubForkRibbon
         href="//github.com/socialgouv/matomoboard"

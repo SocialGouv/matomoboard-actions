@@ -8,6 +8,10 @@ inputs:
   matomo-token:
     description: "Matomo API Token"
     required: true
+  output:
+    description: "File to create"
+    default: data.json
+    required: false
 
 runs:
   using: "composite"
@@ -16,12 +20,11 @@ runs:
       with:
         node-version: "14"
     - name: Build
-      id: build
       shell: bash
       run: |
         cd ${{ github.action_path }}
         yarn
-        yarn start > ${{ github.workspace }}/data.json
+        yarn start > ${{ github.workspace }}/${{ inputs.output }}
       env:
         MATOMO_URL: ${{ inputs.matomo-url }}
         MATOMO_TOKEN: ${{ inputs.matomo-token }}

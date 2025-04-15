@@ -19,6 +19,8 @@ jobs:
           token-bureau-url: https://token-bureau.fabrique.social.gouv.fr
           audience: socialgouv
       - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.token.outputs.token }}
       - uses: actions/setup-node@v4
         with:
           node-version: "22.x"
